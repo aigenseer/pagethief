@@ -1,0 +1,49 @@
+{
+  "name": "pagethief",
+  "version": "0.0.1",
+  "description": "Browser-Extension to download websites offline",
+  "main": "webpack.config.js",
+  "dependencies": {
+    "@types/chrome": "0.0.104"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.0.104",
+    "@types/node": "^13.11.1",
+    "awesome-typescript-loader": "^5.2.1",
+    "css-loader": "^3.5.2",
+    "mini-css-extract-plugin": "^0.9.0",
+    "node-sass": "^4.13.1",
+    "npm-run-all": "^4.1.5",
+    "sass-loader": "^8.0.2",
+    "ts-node": "^8.8.2",
+    "tslint": "^6.1.1",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "scripts": {
+    "build:contentscript-background": "NODE_ENV=production webpack --config webpack.config.js",
+    "build": "npm run build:contentscript-background",
+    "watch:contentscript-background": "NODE_ENV=development webpack --config webpack.config.js -w",
+    "watch": "npm-run-all watch:*",
+    "clean": "rm -rf dist && mkdir dist dist/assets && cp manifest.json dist",
+    "cleanlater": "rm -rf dist && mkdir dist dist/assets && cp manifest.json dist && cp src/assets/* dist/assets",
+    "prebuild": "npm run clean",
+    "prewatch": "npm run clean"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aigenseer/PageThief.git"
+  },
+  "keywords": [
+    "chrome",
+    "extension",
+    "typescript"
+  ],
+  "author": "aigenseer",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/aigenseer/PageThief/issues"
+  },
+  "homepage": "https://github.com/aigenseer/PageThief#readme"
+}
