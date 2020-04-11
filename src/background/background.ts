@@ -1,4 +1,13 @@
-chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
-    console.log("Received %o from %o, frame", msg, sender.tab, sender.frameId);
-    sendResponse("Gotcha!");
+import BackgroundUtils from "../lib/utils/BackgroundUtils";
+import HTMLUtils       from "../lib/utils/HTMLUtils";
+
+
+BackgroundUtils.onMessage((msg, sender, sendResponse) => {
+    if(msg.startPage){
+        console.log(HTMLUtils.getLinksFromDocumentString(msg.startPage));
+        
+
+        //let regEx = ParameterUtils.getRegEx();
+        //console.log(msg.startPage.match(regEx));
+    }    
 });

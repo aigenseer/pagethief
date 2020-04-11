@@ -1,3 +1,9 @@
-chrome.runtime.sendMessage({text: "hey"}, function(response) {
-    console.log("Response: ", response);
+import ContentUtils from "../lib/utils/ContentUtils";
+import HTMLUtils from "../lib/utils/HTMLUtils";
+
+
+
+
+ContentUtils.sendMessage({startPage: HTMLUtils.getDocumentHTML()}, (response) => {
+    console.log(response);
 });
