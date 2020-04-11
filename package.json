@@ -10,6 +10,7 @@
     "@types/chrome": "0.0.104",
     "@types/node": "^13.11.1",
     "awesome-typescript-loader": "^5.2.1",
+    "cra-build-watch": "^3.2.0",
     "css-loader": "^3.5.2",
     "mini-css-extract-plugin": "^0.9.0",
     "node-sass": "^4.13.1",
@@ -22,9 +23,12 @@
     "webpack-cli": "^3.3.11"
   },
   "scripts": {
+    "build:popup": "npm run build --prefix src/popup && cd src/popup/build && cpy * /static/* ../../../dist/popup --parents",
     "build:contentscript-background": "NODE_ENV=production webpack --config webpack.config.js",
     "build": "npm run build:contentscript-background",
+    "watch:build": "cra-build-watch -v --build-path ../../dist/popup",
     "watch:contentscript-background": "NODE_ENV=development webpack --config webpack.config.js -w",
+    "watch:popup": "npm run watch:build --prefix src/popup",
     "watch": "npm-run-all watch:*",
     "clean": "rm -rf dist && mkdir dist dist/assets && cp manifest.json dist",
     "cleanlater": "rm -rf dist && mkdir dist dist/assets && cp manifest.json dist && cp src/assets/* dist/assets",

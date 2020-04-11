@@ -6,7 +6,6 @@
     "content_scripts": [
       {
         "js": ["contentscript.js"],
-        "css": ["contentscript.css"],
         "matches": ["<all_urls>"]
       }
     ],
@@ -15,5 +14,9 @@
       "persistent": false
     },
     "web_accessible_resources": ["assets/*"],
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+    "content_security_policy": "script-src 'self' 'unsafe-eval' 'sha256-....'; object-src 'self'",
+    "browser_action": {
+      "default_popup": "popup/index.html",
+      "default_title": "React Chrome Extension Starter"
+    }
   }
