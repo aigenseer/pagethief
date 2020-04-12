@@ -95,6 +95,14 @@ export default class PageDocument {
         return this.getPageLinksFromLinks(links);
     }
 
+    public getPageLinksFromCurrentOrigin()
+    {
+        let links = this.getAllLinksFromHTML();
+        return this.getPageLinksFromLinks(links).filter((e: IPageLink) => {
+            return e.url.origin == this.origin;
+        })
+    }
+
     public getCssPageLinks(){
        let cssLinks = this.getAllCSSLinksFromHTML();
        return this.getPageLinksFromLinks(cssLinks);

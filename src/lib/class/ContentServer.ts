@@ -6,8 +6,7 @@ import ContentClient          from "./ContentClient";
 import LoggerUtils            from "../utils/LoggerUtils";
 
 interface IContentServer{
-    getCurrentClientCallback(client: ContentClient): void;
-    getAnalysisFromCurrentClientCallback(pageDocumentParam: IPageDocumentParam): void;
+    getCurrentPageDocumentParamCallback(pageDocumentParam: IPageDocumentParam): void;
 }
 
 export default class ContentServer {
@@ -49,28 +48,47 @@ export default class ContentServer {
         }
     }
 
-    private getCurrentClient(cb: IContentServer["getCurrentClientCallback"] ){
-        BrowserUtils.getCurrentTabID(tabID => {
-            let client = null;
-            if(tabID != null && Object.keys(tabID) ){
-                client = this.client[tabID];               
-            }else{
-                LoggerUtils.warn("Current client not found on ContentServer::getCurrentClient");
-            }     
-            cb(client);
+    private getCurrentClient(): Promise<ContentClient>
+    {
+        return new Promise((resolve, reject) => {
+            BrowserUtils.getCurrentTabID(tabID => {
+                let client = null;
+                if(tabID != null && Object.keys(tabID) ){
+                    client = this.client[tabID];               
+                }else{
+                    LoggerUtils.warn("Current client not found on ContentServer::getCurrentClient");
+                }     
+                resolve(client);
+            });
         });
+       
     }
          
-    public getAnalysisFromCurrentClient(cb: IContentServer["getAnalysisFromCurrentClientCallback"]){
-        this.getCurrentClient(client => {
+    public getCurrentPageDocumentParam(cb: IContentServer["getCurrentPageDocumentParamCallback"]){
+        this.getCurrentClient().then(client => {
             if(client != null){
-                client.runTask("onAnalysis", null, (param) => {
+                client.runTask("getCurrentPageDocumentParam", null, (param) => {
                     cb(param);                    
                 })
             }else{
                 LoggerUtils.warn("No client found");         
             }              
         });
+    }
+
+    public getData(link: string, type: 'binary'|'string'){
+        return new Promise((resolve, reject) => {
+            this.getCurrentClient().then(client => {
+                if(client != null){
+                    client.runTask("getData", { link, type }, (param) => {
+                        resolve(param);                   
+                    })
+                }else{
+                    resolve(null);
+                    LoggerUtils.warn("No client found");         
+                }              
+            });
+        });        
     }
 
 

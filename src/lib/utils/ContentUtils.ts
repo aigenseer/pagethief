@@ -38,7 +38,8 @@ export class ContentConnection{
 
     private currentResponse: Response = null; 
     private TASK_MAP: { [key: string]: IContentConnection["callback"] } = {
-        onAnalysis: ()=>{}
+        getCurrentPageDocumentParam: ()=>{},
+        getData:() => {}
     }  
 
     constructor(){
@@ -47,8 +48,9 @@ export class ContentConnection{
 
     private handleRouting(response: Response){
         if(response.task && Object.keys(this.TASK_MAP).includes(response.task)){
-            let callParameter: Response["param"] = this.TASK_MAP[response.task](response.param);
-            ContentUtils.sendMessage(response.task, callParameter, this.handleRouting);
+            this.TASK_MAP[response.task](response.param).then(callParameter => {
+                ContentUtils.sendMessage(response.task, callParameter, this.handleRouting);
+            });
         }else{
             throw "Response Task not found: "+JSON.stringify(response);
         }
@@ -58,8 +60,12 @@ export class ContentConnection{
         ContentUtils.sendMessage("openConnection", null, this.handleRouting);
     }
 
-    public onGetAnalysis(callback: IContentConnection["callback"]){
-        this.TASK_MAP.onAnalysis = callback;
+    public onRequireCurrentPageDocumentParam(callback: IContentConnection["callback"]){
+        this.TASK_MAP.getCurrentPageDocumentParam = callback;
+    }
+
+    public onFetchData(callback: IContentConnection["callback"]){
+        this.TASK_MAP.getData = callback;
     }
 
 }
