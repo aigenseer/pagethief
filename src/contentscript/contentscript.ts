@@ -1,9 +1,17 @@
 import ContentUtils from "../lib/utils/ContentUtils";
-import HTMLUtils from "../lib/utils/HTMLUtils";
+import HTMLUtils    from "../lib/utils/HTMLUtils";
 
 
-
-
-ContentUtils.sendMessage({startPage: HTMLUtils.getDocumentHTML()}, (response) => {
-    console.log(response);
+const contentConnection = ContentUtils.getConnection();
+contentConnection.onGetAnalysis( (param) => {
+    return HTMLUtils.getPageDocumentParameterFromCurrentDocument();
 });
+
+
+// ContentUtils.getAnalysis(() => {
+//     console.log(response);
+// });
+
+// ContentUtils.sendMessage({startPageDocumentParam: HTMLUtils.getPageDocumentParameterFromCurrentDocument()}, (response) => {
+//     console.log(response);
+// });

@@ -1,5 +1,5 @@
-import LoggerUtils from "./LoggerUtils";
-import IBrowser    from "../../interface/IBrowser";
+import LoggerUtils  from "./LoggerUtils";
+import IBrowser     from "../../interface/IBrowser";
 
 
 interface IContentUtils{
@@ -18,3 +18,6 @@ export default class BackgroundUtils {
     }
 
 }
+
+
+

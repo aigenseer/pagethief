@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
-    "name": "My chrome extension",
-    "version": "1.0.0",
+    "name": "PageThief",
+    "version": "0.0.1",
     "permissions": ["tabs", "activeTab", "storage"],
     "content_scripts": [
       {
@@ -17,6 +17,7 @@
     "content_security_policy": "script-src 'self' 'unsafe-eval' 'sha256-....'; object-src 'self'",
     "browser_action": {
       "default_popup": "popup/index.html",
-      "default_title": "React Chrome Extension Starter"
-    }
-  }
+      "default_title": "PageThief"
+    },
+    "run_at": "document_idle"
+}

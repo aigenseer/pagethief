@@ -1,5 +1,5 @@
 
-const ACTIVE_LOGGING = true;
+const ACTIVE_LOGGING = false;
 
 export default class LoggerUtils {
 
@@ -7,6 +7,21 @@ export default class LoggerUtils {
         if(ACTIVE_LOGGING){
             console.log(...args);
         }        
+    }
+
+    static warn(...args){
+        if(ACTIVE_LOGGING){
+            console.warn(...args);
+        }        
+    }
+
+    static error(error: string, throwError = false){
+        if(ACTIVE_LOGGING){
+            console.error(error);
+            if(throwError){
+                throw error;
+            }
+        }
     }
 
 }

@@ -1,23 +1,20 @@
 
+import PageDocument, { IPageDocumentParam } from "../class/PageDocument";
 
-export default class HTMLUtils {
+export default class PageDocumentUtils {
 
-    static getDocumentHTML()
+    static getPageDocumentParameterFromCurrentDocument(): IPageDocumentParam
     {
-        return document.documentElement.innerHTML;
-    }
+        return {
+            html:   document.documentElement.outerHTML, 
+            origin: window.location.origin,
+            href:   window.location.href,
+        };
+    } 
 
-    static getLinksFromDocumentString(html: string)
+    static getPageDocumentFromCurrentDocument(): PageDocument
     {
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(html, "text/html");
-        return doc.links;
-    }
-
-    static getLinksFromOwnDomain(html: string){
-        return HTMLUtils.getLinksFromDocumentString(html).filter((e, i) => {
-            
-        });
-    }
+        return new PageDocument(PageDocumentUtils.getPageDocumentParameterFromCurrentDocument());
+    }   
 
 }

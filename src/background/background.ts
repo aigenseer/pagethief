@@ -1,13 +1,17 @@
-import BackgroundUtils from "../lib/utils/BackgroundUtils";
-import HTMLUtils       from "../lib/utils/HTMLUtils";
+import ContentServer  from "../lib/class/ContentServer";
+import PageDocument   from "../lib/class/PageDocument";
 
-
-BackgroundUtils.onMessage((msg, sender, sendResponse) => {
-    if(msg.startPage){
-        console.log(HTMLUtils.getLinksFromDocumentString(msg.startPage));
+const contentServer = new ContentServer();
+setTimeout(() => {
+    
+    contentServer.getAnalysisFromCurrentClient( pageDocumentParam => {
         
+        let startPageDocument: PageDocument = new PageDocument(pageDocumentParam);
+        console.log("getPageLinks",       startPageDocument.getPageLinks());
+        console.log("getCssPageLinks",    startPageDocument.getCssPageLinks());
+        console.log("getScriptPageLinks", startPageDocument.getScriptPageLinks());
+        console.log("getImagePageLinks",  startPageDocument.getImagePageLinks());
+        
+    });
 
-        //let regEx = ParameterUtils.getRegEx();
-        //console.log(msg.startPage.match(regEx));
-    }    
-});
+}, 3000);
