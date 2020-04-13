@@ -1,5 +1,5 @@
 
-const ACTIVE_LOGGING = false;
+const ACTIVE_LOGGING = true;
 
 export default class LoggerUtils {
 

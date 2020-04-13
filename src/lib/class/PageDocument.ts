@@ -26,6 +26,10 @@ export default class PageDocument {
         this.href    = pageDocumentParam.href;        
     }
 
+    public getHref(){
+        return this.href;
+    }
+
     private getExtensionOrigin()
     {
         return window.location.origin;

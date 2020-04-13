@@ -35,8 +35,7 @@ export interface IContentConnection{
 }
 
 export class ContentConnection{
-
-    private currentResponse: Response = null; 
+    
     private TASK_MAP: { [key: string]: IContentConnection["callback"] } = {
         getCurrentPageDocumentParam: ()=>{},
         getData:() => {}

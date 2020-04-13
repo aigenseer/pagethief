@@ -12,6 +12,21 @@ export default class PageDocumentUtils {
         };
     } 
 
+    static createPageDocumentParam(link: string, html: string): IPageDocumentParam
+    {
+        let url = new URL(link);
+        return {
+            html:   html, 
+            origin: url.origin,
+            href:   url.href,
+        };
+    }
+
+    static createPageDocument(link: string, html: string): PageDocument
+    {
+        return new PageDocument(PageDocumentUtils.createPageDocumentParam(link, html));
+    }
+
     static getPageDocumentFromCurrentDocument(): PageDocument
     {
         return new PageDocument(PageDocumentUtils.getPageDocumentParameterFromCurrentDocument());

@@ -76,7 +76,8 @@ export default class ContentServer {
         });
     }
 
-    public getData(link: string, type: 'binary'|'string'){
+    public getData(link: string, type: 'base64'|'string'): Promise<string>
+    {
         return new Promise((resolve, reject) => {
             this.getCurrentClient().then(client => {
                 if(client != null){
