@@ -27,4 +27,8 @@ export default class BrowserUtils {
         })
     }
 
+    static getBackground(){
+        return chrome.extension.getBackgroundPage()
+    }
+
 }

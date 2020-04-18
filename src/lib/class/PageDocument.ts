@@ -26,11 +26,33 @@ export default class PageDocument {
         this.href    = pageDocumentParam.href;        
     }
 
-    public getHref(){
+    public getHTML(){
+        return this.html;
+    }
+
+    public getHTMLWithLocalLinks(){
+        let html      = this.html;
+        const rootOrigin = this.getRootURL().origin;
+        let pagelinks = this.getPageLinksFromCurrentOrigin();
+        pagelinks     = pagelinks.concat(this.getCssPageLinksFromCurrentOrigin());
+        pagelinks     = pagelinks.concat(this.getScriptPageLinksFromCurrentOrigin());
+        pagelinks     = pagelinks.concat(this.getImagePageLinksFromCurrentOrigin());
+        for (const pageLink of pagelinks) {
+          let localLink = pageLink.sourceLink.replace(rootOrigin, ".");          
+          html = html.replace(pageLink.sourceLink, localLink);            
+        }
+        return html;
+    }
+
+    public getRootHref(){
         return this.href;
     }
 
-    private getExtensionOrigin()
+    public getRootURL(){
+        return this.getURLFromLink(this.getRootHref());
+    }
+
+    public getExtensionOrigin()
     {
         return window.location.origin;
     }
@@ -99,12 +121,18 @@ export default class PageDocument {
         return this.getPageLinksFromLinks(links);
     }
 
+    private isURLfromCurrentOrigin(url: URL){
+        return url.origin == this.origin;
+    }
+
+    private filterPageLinksFromCurrentOrigin(pageLinks: IPageLink[]){
+        return pageLinks.filter((e: IPageLink) => this.isURLfromCurrentOrigin(e.url));
+    }
+
     public getPageLinksFromCurrentOrigin()
     {
         let links = this.getAllLinksFromHTML();
-        return this.getPageLinksFromLinks(links).filter((e: IPageLink) => {
-            return e.url.origin == this.origin;
-        })
+        return this.filterPageLinksFromCurrentOrigin(this.getPageLinksFromLinks(links));
     }
 
     public getCssPageLinks(){
@@ -112,14 +140,26 @@ export default class PageDocument {
        return this.getPageLinksFromLinks(cssLinks);
     }
 
+    public getCssPageLinksFromCurrentOrigin(){
+        return this.filterPageLinksFromCurrentOrigin(this.getCssPageLinks());
+    }
+
     public getScriptPageLinks(){
         let scriptLinks = this.getAllScriptLinksFromHTML();
         return this.getPageLinksFromLinks(scriptLinks);
     }
 
+    public getScriptPageLinksFromCurrentOrigin(){
+        return this.filterPageLinksFromCurrentOrigin(this.getScriptPageLinks());
+    }
+
     public getImagePageLinks(){
         let imageLinks = this.getAllImageLinksFromHTML();
         return this.getPageLinksFromLinks(imageLinks);
+    }
+
+    public getImagePageLinksFromCurrentOrigin(){
+        return this.filterPageLinksFromCurrentOrigin(this.getImagePageLinks());
     }
     
 

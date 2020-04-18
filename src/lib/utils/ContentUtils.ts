@@ -34,7 +34,7 @@ export interface IContentConnection{
     callback(param: Response["param"]): Response["param"]
 }
 
-export class ContentConnection{
+export class ContentConnection {
     
     private TASK_MAP: { [key: string]: IContentConnection["callback"] } = {
         getCurrentPageDocumentParam: ()=>{},

@@ -1,11 +1,13 @@
 import IBrowser     from "../../interface/IBrowser";
 import LoggerUtils  from "../utils/LoggerUtils";
+import { IPageDocumentParam } from "./PageDocument";
 
 export interface IContentTask{
     id: string;
     param: null|any;
     result: any|null
     onResultCallback(result: IContentTask["param"]): void;
+
 }
 
 export class ContentTask {
@@ -36,6 +38,10 @@ export class ContentTask {
         sendResponse({ task: this.id,  param: this.param });
     }     
                 
+}
+
+interface IContentClient{
+    getCurrentPageDocumentParamCallback(pageDocumentParam: IPageDocumentParam): void;
 }
 
 
@@ -73,6 +79,22 @@ export default class ContentClient {
         this.currentTask     = null;
         this.currentResponse = currentResponse;
         this.startTask();              
+    }
+
+
+    public getCurrentPageDocumentParam(cb: IContentClient["getCurrentPageDocumentParamCallback"]){
+        this.runTask("getCurrentPageDocumentParam", null, (param) => {
+            cb(param);                    
+        })
+    }
+
+    public getData(link: string, type: 'base64'|'string'|'arraybuffer'): Promise<string>
+    {
+        return new Promise((resolve, reject) => {
+            this.runTask("getData", { link, type }, (param) => {
+                resolve(param);                   
+            })
+        });        
     }
 
 }

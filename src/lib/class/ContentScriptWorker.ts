@@ -1,5 +1,4 @@
 import axios       from "axios";
-
 import LoggerUtils from "../utils/LoggerUtils";
 
 
@@ -10,12 +9,14 @@ export default class ContentScriptWorker {
         return document.documentElement.innerHTML;
     }
 
-    static fetchData(url: string, type: 'base64'|'string' ){
+    static fetchData(url: string, type: 'base64'|'string'|'arraybuffer' ){
         switch (type) {
             case 'base64':
                 return ContentScriptWorker.fetchDataAsBase64(url);
                 break;
-        
+            case 'arraybuffer':
+                return ContentScriptWorker.fetchDataAsArrayBuffer(url);
+                break;        
             default:
                 return ContentScriptWorker.fetchDataAsString(url);
                 break;
@@ -30,6 +31,19 @@ export default class ContentScriptWorker {
                 }else{
                     resolve(null);
                 }
+            }).catch(reject);
+        });
+    }
+    
+
+    static fetchDataAsArrayBuffer(url: string){
+        return new Promise( (resolve, reject) => {
+            axios.get(url, { responseType: 'arraybuffer' }).then((response) => {
+                if(response.data){
+                    resolve(response.data);
+                }else{
+                    resolve(null);
+                }                
             }).catch(reject);
         });
     }

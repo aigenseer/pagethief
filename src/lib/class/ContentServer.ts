@@ -1,13 +1,12 @@
 import BrowserUtils           from "../utils/BrowserUtils";
 import BackgroundUtils        from "../utils/BackgroundUtils";
 import IBrowser               from "../../interface/IBrowser";
-import { IPageDocumentParam } from "./PageDocument";
+
 import ContentClient          from "./ContentClient";
 import LoggerUtils            from "../utils/LoggerUtils";
 
-interface IContentServer{
-    getCurrentPageDocumentParamCallback(pageDocumentParam: IPageDocumentParam): void;
-}
+
+
 
 export default class ContentServer {
 
@@ -48,7 +47,7 @@ export default class ContentServer {
         }
     }
 
-    private getCurrentClient(): Promise<ContentClient>
+    public getCurrentClient(): Promise<ContentClient>
     {
         return new Promise((resolve, reject) => {
             BrowserUtils.getCurrentTabID(tabID => {
@@ -64,33 +63,7 @@ export default class ContentServer {
        
     }
          
-    public getCurrentPageDocumentParam(cb: IContentServer["getCurrentPageDocumentParamCallback"]){
-        this.getCurrentClient().then(client => {
-            if(client != null){
-                client.runTask("getCurrentPageDocumentParam", null, (param) => {
-                    cb(param);                    
-                })
-            }else{
-                LoggerUtils.warn("No client found");         
-            }              
-        });
-    }
-
-    public getData(link: string, type: 'base64'|'string'): Promise<string>
-    {
-        return new Promise((resolve, reject) => {
-            this.getCurrentClient().then(client => {
-                if(client != null){
-                    client.runTask("getData", { link, type }, (param) => {
-                        resolve(param);                   
-                    })
-                }else{
-                    resolve(null);
-                    LoggerUtils.warn("No client found");         
-                }              
-            });
-        });        
-    }
+    
 
 
 }
