@@ -31,17 +31,51 @@ export default class PageDocument {
     }
 
     public getHTMLWithLocalLinks(){
-        let html      = this.html;
-        const rootOrigin = this.getRootURL().origin;
-        let pagelinks = this.getPageLinksFromCurrentOrigin();
-        pagelinks     = pagelinks.concat(this.getCssPageLinksFromCurrentOrigin());
-        pagelinks     = pagelinks.concat(this.getScriptPageLinksFromCurrentOrigin());
-        pagelinks     = pagelinks.concat(this.getImagePageLinksFromCurrentOrigin());
-        for (const pageLink of pagelinks) {
-          let localLink = pageLink.sourceLink.replace(rootOrigin, ".");          
+        let html            = this.html;
+        let assetsPageLinks = this.getCssPageLinksFromCurrentOrigin();
+        assetsPageLinks     = assetsPageLinks.concat(this.getScriptPageLinksFromCurrentOrigin());
+        assetsPageLinks     = assetsPageLinks.concat(this.getImagePageLinksFromCurrentOrigin());
+
+        for (const pageLink of this.getPageLinksFromCurrentOrigin()) {
+            let sourceLink = this.getNormalizeLink(pageLink.sourceLink, "index.html"); 
+            let localLink  = this.getRelativePathToRootPath(sourceLink); 
+            html = html.replace(sourceLink, localLink);            
+          }
+                
+        for (const pageLink of assetsPageLinks) {
+          let localLink  = this.getRelativePathToRootPath(pageLink.sourceLink); 
           html = html.replace(pageLink.sourceLink, localLink);            
         }
         return html;
+    }
+
+    private getRelativePathToRootPath(sourceLink: string){
+        if(sourceLink.includes(this.getRootURL().origin)){
+            let urlParts = this.getRootURL().href.split('/');
+            if(urlParts[urlParts.length-1].includes(".")) urlParts = urlParts.slice(0, -1);
+            let search = urlParts.join("/")+"/";           
+            
+            return sourceLink.replace(search, "");    
+        }
+        return sourceLink;
+    }
+
+    private getNormalizeLink(link: string, appendFileName: string){
+        let linkParts                 = link.split("/");
+        let extFilename               = linkParts.pop();
+        let extFilenameExtensionParts = extFilename.split(".");
+        let appenFileExtension        = appendFileName.split(".").pop();
+
+        if(extFilename.length == 0 || extFilenameExtensionParts.length > 1){
+            link += appendFileName;    
+        }else if(extFilenameExtensionParts[extFilenameExtensionParts.length-1] != appenFileExtension) {
+            link = linkParts.join("/")+[extFilenameExtensionParts[0], appenFileExtension].join(".");
+        }       
+        return link;
+    }
+
+    public getNormalizeHref(){
+        return this.getNormalizeLink(this.href, "index.html");
     }
 
     public getRootHref(){

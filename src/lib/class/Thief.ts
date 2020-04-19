@@ -5,12 +5,12 @@ import ContentClient                                   from "./ContentClient";
 
 export interface IThiefAsset {
     link: string;
-    data: string;
+    data: Blob;
     type: IThief["type"]
 }
 
 export interface IThief{
-    type: 'base64'|'string'|'arraybuffer',    
+    type: 'base64'|'string'|'blob',    
     assetQueue: {
         link: string;
         type: IThief["type"]
@@ -73,7 +73,6 @@ export default class Thief {
 
     private addPageLinksToQueue(pageLinks: IPageLink[]){
         for (const pageLink of pageLinks) {
-            // this.addLinkToQueue(pageLink.url.href, "string");
             this.addLinkToQueue(pageLink.url.origin+pageLink.url.pathname, "string");
         }            
     }    
@@ -87,10 +86,10 @@ export default class Thief {
 
     private fetchPages(){
         if(this.queueURL.length > 0){
-            let task = this.queueURL.shift();
+            let task = this.queueURL.shift();         
             this.contentClient.getData(task.link, task.type).then( (data) => {
                 if(data != null){
-                    let currentPageDocument = HTMLUtils.createPageDocument(task.link, data);
+                    let currentPageDocument = HTMLUtils.createPageDocument(task.link, data as string);
                     this.pageDocuments.push(currentPageDocument);
     
                     if(this.options.recursive){
@@ -114,21 +113,21 @@ export default class Thief {
             if(this.options.downloadCSS){
                 assets = assets.concat(pageDocument.getCssPageLinksFromCurrentOrigin().map((pageLink: IPageLink) =>  ({
                     link: pageLink.url.href,
-                    type: 'arraybuffer'
+                    type: 'blob'
                 })));
             }
 
             if(this.options.downloadScripts){
                 assets = assets.concat(pageDocument.getScriptPageLinksFromCurrentOrigin().map((pageLink: IPageLink) =>  ({
                     link: pageLink.url.href,
-                    type: 'arraybuffer'
+                    type: 'blob'
                 })))
             }
 
             if(this.options.donwloadImages){
                 assets = assets.concat(pageDocument.getImagePageLinksFromCurrentOrigin().map((pageLink: IPageLink) =>  ({
                     link: pageLink.url.href,
-                    type: 'arraybuffer'
+                    type: 'blob'
                 })))
             }
         }            
@@ -149,7 +148,7 @@ export default class Thief {
             let task = this.assetQueue.shift();
             this.contentClient.getData(task.link, task.type).then( (data) => {
                if(data != null){
-                    this.assets.push({ ...task, data })
+                    this.assets.push({ ...task, data: data as Blob })
                }               
                this.fetchAssets();
             }).catch(() => this.fetchAssets());

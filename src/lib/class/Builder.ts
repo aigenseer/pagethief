@@ -1,23 +1,8 @@
 import Thief, { IThief } from "./Thief";
 const JSZip = require("jszip");
 
-/**
- * var zip = new JSZip();
- 
-zip.file("Hello.txt", "Hello World\n");
- 
-var img = zip.folder("images");
-img.file("smile.gif", imgData, {base64: true});
- 
-zip.generateAsync({type:"blob"}).then(function(content) {
-    // see FileSaver.js
-    saveAs(content, "example.zip");
-});
- */
 
-export interface IBuilder{
-
-}
+export interface IBuilder{}
 
 export interface IBuilderFolder{
      name: string;
@@ -29,7 +14,7 @@ export interface IBuilderFolder{
 
 export interface IBuilderFile{
     name: string;
-    data: string|ArrayBuffer;
+    data: string|Blob;
 }
 
 export default class Builder {
@@ -55,15 +40,13 @@ export default class Builder {
                 let hrefPart     = this.getHrefPartFromLink(asset.link);            
                 let folderNames  = this.getFolderNamesFromHrefPart(hrefPart);                
                 let folder       = this.createFolderRecurively(folderNames);   
-                this.addFileToFolder(this.getFilenameFromLink(asset.link), asset.data, asset.type, folder);
+                this.addFileToFolder(this.getFilenameFromLink(asset.link), asset.data as Blob, asset.type, folder);
             }
     
             for (const pageDocument of this.thief.getPageDocuments()) {
-                let hrefPart     = this.getHrefPartFromLink(pageDocument.getRootHref());
+                let hrefPart     = this.getHrefPartFromLink(pageDocument.getNormalizeHref());
                 let folderNames  = this.getFolderNamesFromHrefPart(hrefPart);                
-                let folder       = this.createFolderRecurively(folderNames);
-                console.log(folder);
-                
+                let folder       = this.createFolderRecurively(folderNames);                
                 this.addFileToFolder(this.getFilenameFromLink(pageDocument.getRootHref()), pageDocument.getHTMLWithLocalLinks(), 'string', folder);
             }   
     
@@ -78,7 +61,7 @@ export default class Builder {
     private getHrefPartFromLink(link: string){
         return link.replace(this.rootURL.origin, "");
     }
-
+    
     private getFolderNamesFromHrefPart(hrefPart: string){
         let folderNames = hrefPart.split('/').filter(s => s.length > 0);            
             folderNames.pop();  
@@ -108,7 +91,7 @@ export default class Builder {
     }
 
 
-    private addFileToFolder(filename: string, data: string, type: IThief["type"], folder: IBuilderFolder){        
+    private addFileToFolder(filename: string, data: string|Blob, type: IThief["type"], folder: IBuilderFolder){        
         folder.files.push({
             name: filename,
             data
@@ -117,7 +100,7 @@ export default class Builder {
 
     private buildZipFile(zipFolder: any, folder: IBuilderFolder){
         for (const file of folder.files) {
-            zipFolder.file(file.name, file.data);
+            zipFolder.file(file.name, file.data);          
         }
         const childrenFolderNames = Object.keys(folder.childrenFolders);
         for (const childrenFolderName of childrenFolderNames) {

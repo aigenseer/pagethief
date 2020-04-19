@@ -1,6 +1,7 @@
 import IBrowser     from "../../interface/IBrowser";
 import LoggerUtils  from "../utils/LoggerUtils";
 import { IPageDocumentParam } from "./PageDocument";
+import FormatUtils  from "../utils/FormatUtils";
 
 export interface IContentTask{
     id: string;
@@ -73,6 +74,14 @@ export default class ContentClient {
         this.startTask();
     }
 
+    public runTaskPromise(id: IContentTask["id"], param: IContentTask["param"]): Promise<IContentTask["param"]>
+    {
+        return new Promise(async (resolve, reject) => {
+            this.runTask(id, param, (result) => resolve(result));
+        });        
+    }
+
+
     public responseTask(taskID: string, result: any|null, currentResponse){
         LoggerUtils.log("Client %s response task %s with result ", this.id, taskID, result);
         this.currentTask.setResult(result);
@@ -88,12 +97,36 @@ export default class ContentClient {
         })
     }
 
-    public getData(link: string, type: 'base64'|'string'|'arraybuffer'): Promise<string>
+  
+    
+
+
+    public getData(link: string, type: 'base64'|'string'|'blob'|'dataURL'): Promise<string|Blob>
     {
-        return new Promise((resolve, reject) => {
-            this.runTask("getData", { link, type }, (param) => {
-                resolve(param);                   
-            })
+        return new Promise(async (resolve, reject) => {
+            try {
+                let requestType = type;
+                switch (type) {
+                    case "blob":
+                            requestType = "base64";
+                        break;            
+                    default:
+                        break;
+                }
+                let param = await this.runTaskPromise("getData", { link, type: requestType });
+                switch (type) {
+                    case "blob":
+                            if(param != null){
+                                param = await FormatUtils.getBlobFromBase64(param);
+                            }                        
+                        break;                
+                    default:
+                        break;
+                }   
+                resolve(param);   
+            } catch (error) {
+                reject(error)
+            }                                        
         });        
     }
 

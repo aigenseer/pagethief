@@ -18,8 +18,6 @@ window["pageThief"] = {
 
 const contentServer = new ContentServer();
 
-
-
 setTimeout(async () => {
         
     try {

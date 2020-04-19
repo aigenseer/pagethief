@@ -11,14 +11,4 @@ contentConnection.onRequireCurrentPageDocumentParam( (param) => new Promise( asy
 contentConnection.onFetchData( (param) => new Promise( async (resolve) => {
     ContentScriptWorker.fetchData(param.link, param.type).then(resolve).catch(() => resolve(null));
 }));
-        
-
-
-
-// ContentUtils.getAnalysis(() => {
-//     console.log(response);
-// });
-
-// ContentUtils.sendMessage({startPageDocumentParam: HTMLUtils.getPageDocumentParameterFromCurrentDocument()}, (response) => {
-//     console.log(response);
-// });
+    

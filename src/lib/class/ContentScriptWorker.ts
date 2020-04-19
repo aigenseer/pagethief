@@ -1,5 +1,5 @@
 import axios       from "axios";
-import LoggerUtils from "../utils/LoggerUtils";
+import FormatUtils from "../utils/FormatUtils";
 
 
 export default class ContentScriptWorker {
@@ -9,13 +9,13 @@ export default class ContentScriptWorker {
         return document.documentElement.innerHTML;
     }
 
-    static fetchData(url: string, type: 'base64'|'string'|'arraybuffer' ){
+    static fetchData(url: string, type: 'base64'|'string'|'dataURL' ){
         switch (type) {
             case 'base64':
                 return ContentScriptWorker.fetchDataAsBase64(url);
                 break;
-            case 'arraybuffer':
-                return ContentScriptWorker.fetchDataAsArrayBuffer(url);
+            case 'dataURL':
+                return ContentScriptWorker.fetchDataAsDataURL(url);
                 break;        
             default:
                 return ContentScriptWorker.fetchDataAsString(url);
@@ -36,11 +36,11 @@ export default class ContentScriptWorker {
     }
     
 
-    static fetchDataAsArrayBuffer(url: string){
+    static fetchDataAsDataURL(url: string){
         return new Promise( (resolve, reject) => {
-            axios.get(url, { responseType: 'arraybuffer' }).then((response) => {
+            axios.get(url, { responseType: 'blob' }).then((response) => {
                 if(response.data){
-                    resolve(response.data);
+                    FormatUtils.getDataURLFromBlob(response.data).then(resolve).catch(reject);
                 }else{
                     resolve(null);
                 }                

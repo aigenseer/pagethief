@@ -10,6 +10,8 @@ function App() {
     const backgroundWindow = chrome.extension.getBackgroundPage() as any;
     if(backgroundWindow != null){
       let blob = backgroundWindow["pageThief"].zipBlob;
+      console.log(blob);
+      
       if(blob != null){
         let a = document.createElement("a");
         document.body.appendChild(a);
