@@ -8,6 +8,7 @@
     "axios": "^0.19.2",
     "html-webpack-plugin": "^4.0.0-beta.14",
     "jszip": "^3.3.0",
+    "path": "^0.12.7",
     "react-scripts": "^3.4.1",
     "url": "^0.11.0"
   },

@@ -2,6 +2,7 @@ import React        from 'react';
 import logo         from './logo.svg';
 //import BrowserUtils from "../../lib/utils/BrowserUtils";
 import './App.css';
+import { start } from 'repl';
 
 function App() {
 
@@ -20,42 +21,27 @@ function App() {
         a.download = 'download';
         a.click();
         window.URL.revokeObjectURL(url);
+      }      
+    }    
+  }
 
-      }
-      console.log(blob);
-      
-    }
-    
-    // if(backgroundWindow != null){
-    //   let zipBlob = backgroundWindow.pageTief.zipBlob;
-    //   console.log(zipBlob);
-      
-    // }
-   
+  function start() {
+    console.log("?");
+    const backgroundWindow = chrome.extension.getBackgroundPage() as any;
 
-    /**
-     * 
-     * 
-     * if (data !== null && navigator.msSaveBlob)
-        return navigator.msSaveBlob(new Blob([data], { type: type }), name);
-   
-     */
-    
+    console.log(backgroundWindow);
+    backgroundWindow["pageThief"]?.start();
   }
 
   return (
     <div className="App">
       <header className="App-header">
-        <img  src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
+        
+        <button onClick={() => start()} >
+          <img  src={logo} className="App-logo" alt="logo" />          
+        </button>
 
-        <span
-          onClick={() => startDownload()}
-        >
-          Learn React
-        </span>
+        <span onClick={() => startDownload()} > Download </span>
 >
       </header>
     </div>

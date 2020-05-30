@@ -1,4 +1,5 @@
-const url = require('url');
+import * as url from "url";
+import * as path from "path";
 import RegExUtils from "../utils/RegExUtils";
 
 export interface IPageDocumentParam{
@@ -12,6 +13,9 @@ export interface IPageLink{
     sourceLink: string,
     url: URL
 }
+
+const skipNormalizeExtension = ["html"];
+
 
 export default class PageDocument {
 
@@ -30,48 +34,73 @@ export default class PageDocument {
         return this.html;
     }
 
+    // private getURLPartOfLevel(level: number){
+    //     let part = "";
+    //     for (let index = 0; index < level; index++) {
+    //         part += "../";            
+    //     }
+    //     return part;
+    // }
+
     public getHTMLWithLocalLinks(){
+
         let html            = this.html;
         let assetsPageLinks = this.getCssPageLinksFromCurrentOrigin();
         assetsPageLinks     = assetsPageLinks.concat(this.getScriptPageLinksFromCurrentOrigin());
-        assetsPageLinks     = assetsPageLinks.concat(this.getImagePageLinksFromCurrentOrigin());
-
+        assetsPageLinks     = assetsPageLinks.concat(this.getImagePageLinksFromCurrentOrigin());        
+        
         for (const pageLink of this.getPageLinksFromCurrentOrigin()) {
             let sourceLink = this.getNormalizeLink(pageLink.sourceLink, "index.html"); 
-            let localLink  = this.getRelativePathToRootPath(sourceLink); 
+            let localLink  = this.getRelativePathToRootPath(pageLink.url.href); 
             html = html.replace(sourceLink, localLink);            
-          }
+        }
                 
         for (const pageLink of assetsPageLinks) {
           let localLink  = this.getRelativePathToRootPath(pageLink.sourceLink); 
+          console.log(localLink, pageLink.sourceLink);          
           html = html.replace(pageLink.sourceLink, localLink);            
         }
         return html;
     }
 
-    private getRelativePathToRootPath(sourceLink: string){
-        if(sourceLink.includes(this.getRootURL().origin)){
-            let urlParts = this.getRootURL().href.split('/');
-            if(urlParts[urlParts.length-1].includes(".")) urlParts = urlParts.slice(0, -1);
-            let search = urlParts.join("/")+"/";           
-            
-            return sourceLink.replace(search, "");    
-        }
-        return sourceLink;
+    getRelativePathToRootPath(targetLink: string){
+        let newPath = path.relative(this.getRootURL().protocol, targetLink)
+        let parts = newPath.split("/");
+        parts.shift();
+        newPath = parts.join("/");
+        console.log(this.getRootURL().protocol, targetLink, newPath);        
+        return newPath;
     }
+
+    // private getAbsolutPathToRootPath(sourceLink: string){
+    //     return sourceLink.replace(this.getRootURL().origin, "%PUBLIC_URL%");  
+    // }
+
+    // private getRelativePathToRootPath(sourceLink: string){
+    //     if(sourceLink.includes(this.getRootURL().origin)){
+    //         let urlParts = this.getRootURL().href.split('/');
+    //         if(urlParts[urlParts.length-1].includes(".")) urlParts = urlParts.slice(0, -1);
+    //         let search = urlParts.join("/")+"/";           
+            
+    //         return sourceLink.replace(search, "");    
+    //     }
+    //     return sourceLink;
+    // }
 
     private getNormalizeLink(link: string, appendFileName: string){
         let linkParts                 = link.split("/");
-        let extFilename               = linkParts.pop();
+        let extFilename               = linkParts.slice(-1)[0];
         let extFilenameExtensionParts = extFilename.split(".");
         let appenFileExtension        = appendFileName.split(".").pop();
 
-        if(extFilename.length == 0 || extFilenameExtensionParts.length > 1){
-            link += appendFileName;    
-        }else if(extFilenameExtensionParts[extFilenameExtensionParts.length-1] != appenFileExtension) {
-            link = linkParts.join("/")+[extFilenameExtensionParts[0], appenFileExtension].join(".");
-        }       
-        return link;
+        if(extFilename.length == 0 || extFilenameExtensionParts.length < 2 || !skipNormalizeExtension.includes(appenFileExtension) ){
+            if(link.slice(-1)[0] == "/"){
+                link = link.slice(0, -1); 
+            }
+            return [link, appendFileName].join("/"); 
+        }
+        return link;  
+        
     }
 
     public getNormalizeHref(){

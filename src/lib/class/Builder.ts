@@ -1,5 +1,6 @@
 import Thief, { IThief } from "./Thief";
-const JSZip = require("jszip");
+import * as JSZip from "jszip";
+
 
 
 export interface IBuilder{}
