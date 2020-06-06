@@ -1,177 +1,110 @@
-import * as url from "url";
-import * as path from "path";
-import RegExUtils from "../utils/RegExUtils";
+import RegExUtils                             from "../utils/RegExUtils";
+import BuilderFileManager                     from "./BuilderFileManager";
+import ThiefDocument, { IThiefDocumentParam } from "./ThiefDocument";
+import PageLink                               from "./PageLink";
+import StringUtils                            from "../utils/StringUtils";
 
-export interface IPageDocumentParam{
-    html:   string;
-    origin: string;
-    href:   string;
+
+export interface IPageDocumentParam extends IThiefDocumentParam{
+    data:  string;
 }
 
 
-export interface IPageLink{
-    sourceLink: string,
-    url: URL
-}
+export default class PageDocument extends ThiefDocument{
 
-const skipNormalizeExtension = ["html"];
-
-
-export default class PageDocument {
-
-    private html:   string;
-    private origin: string;
-    private href:   string;
+    protected skipNormalizeExtension = ["html"];
 
     constructor(pageDocumentParam: IPageDocumentParam)
     {
-        this.html    = pageDocumentParam.html;
-        this.origin  = pageDocumentParam.origin;
-        this.href    = pageDocumentParam.href;        
+        super(pageDocumentParam);
     }
 
     public getHTML(){
-        return this.html;
+        return this.data as string;
     }
 
-    // private getURLPartOfLevel(level: number){
-    //     let part = "";
-    //     for (let index = 0; index < level; index++) {
-    //         part += "../";            
-    //     }
-    //     return part;
-    // }
+    public getHTMLWithLocalLinks(builderFileManager: BuilderFileManager){
 
-    public getHTMLWithLocalLinks(){
-
-        let html            = this.html;
+        let html            = this.getHTML();
         let assetsPageLinks = this.getCssPageLinksFromCurrentOrigin();
         assetsPageLinks     = assetsPageLinks.concat(this.getScriptPageLinksFromCurrentOrigin());
         assetsPageLinks     = assetsPageLinks.concat(this.getImagePageLinksFromCurrentOrigin());        
         
+        let currentBuilderFile = builderFileManager.getFileBySourceURL(this.url.origin+this.url.pathname);
+        let currentFilePath    = currentBuilderFile.getPath();     
+                   
+
         for (const pageLink of this.getPageLinksFromCurrentOrigin()) {
-            let sourceLink = this.getNormalizeLink(pageLink.sourceLink, "index.html"); 
-            let localLink  = this.getRelativePathToRootPath(pageLink.url.href); 
-            html = html.replace(sourceLink, localLink);            
+            let builderFile = builderFileManager.getFileBySourceURL(pageLink.getURL().origin+pageLink.getURL().pathname);
+            let newPath     = this.getRelativePathToRootPath(currentFilePath, builderFile.getPath());
+            html            = html.replace(pageLink.getSourceLink(), newPath);
         }
-                
+
         for (const pageLink of assetsPageLinks) {
-          let localLink  = this.getRelativePathToRootPath(pageLink.sourceLink); 
-          console.log(localLink, pageLink.sourceLink);          
-          html = html.replace(pageLink.sourceLink, localLink);            
+            let builderFile = builderFileManager.getFileBySourceURL(pageLink.getSourceLink());
+            if(builderFile == null){
+                console.log(pageLink.getSourceLink()+" not found");
+                console.log(builderFileManager.getAll());
+                
+                throw "stop";
+                
+            }else{
+                let newPath     = this.getRelativePathToRootPath(currentFilePath, builderFile.getPath());
+                html = html.replace(pageLink.getSourceLink(), newPath);     
+            }               
         }
+
         return html;
     }
 
-    getRelativePathToRootPath(targetLink: string){
-        let newPath = path.relative(this.getRootURL().protocol, targetLink)
-        let parts = newPath.split("/");
-        parts.shift();
-        newPath = parts.join("/");
-        console.log(this.getRootURL().protocol, targetLink, newPath);        
-        return newPath;
-    }
-
-    // private getAbsolutPathToRootPath(sourceLink: string){
-    //     return sourceLink.replace(this.getRootURL().origin, "%PUBLIC_URL%");  
-    // }
-
-    // private getRelativePathToRootPath(sourceLink: string){
-    //     if(sourceLink.includes(this.getRootURL().origin)){
-    //         let urlParts = this.getRootURL().href.split('/');
-    //         if(urlParts[urlParts.length-1].includes(".")) urlParts = urlParts.slice(0, -1);
-    //         let search = urlParts.join("/")+"/";           
-            
-    //         return sourceLink.replace(search, "");    
-    //     }
-    //     return sourceLink;
-    // }
-
-    private getNormalizeLink(link: string, appendFileName: string){
-        let linkParts                 = link.split("/");
-        let extFilename               = linkParts.slice(-1)[0];
-        let extFilenameExtensionParts = extFilename.split(".");
-        let appenFileExtension        = appendFileName.split(".").pop();
-
-        if(extFilename.length == 0 || extFilenameExtensionParts.length < 2 || !skipNormalizeExtension.includes(appenFileExtension) ){
-            if(link.slice(-1)[0] == "/"){
-                link = link.slice(0, -1); 
-            }
-            return [link, appendFileName].join("/"); 
-        }
-        return link;  
-        
-    }
-
-    public getNormalizeHref(){
-        return this.getNormalizeLink(this.href, "index.html");
-    }
-
-    public getRootHref(){
-        return this.href;
-    }
-
-    public getRootURL(){
-        return this.getURLFromLink(this.getRootHref());
-    }
-
-    public getExtensionOrigin()
+    private getRegexByTagType(tag: string, attributeID: string)
     {
-        return window.location.origin;
+        return new RegExp("<"+tag+"\\s+(?:[^>]*?\\s+)?"+attributeID+"=([\"'])(.*?)\\1", "gm");
     }
 
     private getAllLinksFromHTML()
     {
-        const regExp = new RegExp("<a\\s+(?:[^>]*?\\s+)?href=([\"'])(.*?)\\1", "gm");
-        return RegExUtils.getMatchList(this.html, regExp).map((match: RegExpExecArray) => {
+        return RegExUtils.getMatchList(this.getHTML(), this.getRegexByTagType("a", "href"))
+        .map((match: RegExpExecArray) => {
             return match[2];
         });
     }  
     
     private getAllCSSLinksFromHTML()
     {
-        const regExp = new RegExp("<link\\s+(?:[^>]*?\\s+)?href=([\"'])(.*?)\\1", "gm");
-        return RegExUtils.getMatchList(this.html, regExp).map((match: RegExpExecArray) => {
+        return RegExUtils.getMatchList(this.getHTML(), this.getRegexByTagType("link", "href"))
+        .map((match: RegExpExecArray) => {
             return match[2];
         });
     }  
 
     private getAllScriptLinksFromHTML()
     {
-        const regExp = new RegExp("<script\\s+(?:[^>]*?\\s+)?src=([\"'])(.*?)\\1", "gm");
-        return RegExUtils.getMatchList(this.html, regExp).map((match: RegExpExecArray) => {
+        return RegExUtils.getMatchList(this.getHTML(), this.getRegexByTagType("script", "src"))
+        .map((match: RegExpExecArray) => {
             return match[2];
         });
     }  
 
     private getAllImageLinksFromHTML()
     {
-        const regExp = new RegExp("<img\\s+(?:[^>]*?\\s+)?src=([\"'])(.*?)\\1", "gm");
-        return RegExUtils.getMatchList(this.html, regExp).map((match: RegExpExecArray) => {
+        return RegExUtils.getMatchList(this.getHTML(), this.getRegexByTagType("img", "src"))
+        .map((match: RegExpExecArray) => {
             return match[2];
         });
     }  
-
-    private getURLFromLink(link: string): URL
-    {
-        link = link.replace(this.getExtensionOrigin(), "");
-        if(!link.includes(this.origin)){
-            link = url.resolve(this.href, link);            
-        }
-        return new URL(link);
-    }
     
-    private getPageLinkFromLink(link: string): IPageLink
+    private getPageLinkFromLink(link: string): PageLink
     {
-        return {
-            sourceLink: link,
-            url: this.getURLFromLink(link)
+        if(!StringUtils.validURL(link) && StringUtils.validURL(this.getRootHref()+link)){
+            link = this.getRootHref()+link;
         }
+        return new PageLink(link);
     }
 
-    private getPageLinksFromLinks(links: string[]): IPageLink[]
+    private getPageLinksFromLinks(links: string[]): PageLink[]
     {
-        let pageLinks: IPageLink[] = [];
+        let pageLinks: PageLink[] = [];
         for (const link of links) {
             pageLinks.push(this.getPageLinkFromLink(link));            
         }
@@ -185,17 +118,16 @@ export default class PageDocument {
     }
 
     private isURLfromCurrentOrigin(url: URL){
-        return url.origin == this.origin;
+        return url.origin == this.url.origin;
     }
 
-    private filterPageLinksFromCurrentOrigin(pageLinks: IPageLink[]){
-        return pageLinks.filter((e: IPageLink) => this.isURLfromCurrentOrigin(e.url));
+    private filterPageLinksFromCurrentOrigin(pageLinks: PageLink[]){
+        return pageLinks.filter((e: PageLink) => this.isURLfromCurrentOrigin(e.getURL()));
     }
 
     public getPageLinksFromCurrentOrigin()
     {
-        let links = this.getAllLinksFromHTML();
-        return this.filterPageLinksFromCurrentOrigin(this.getPageLinksFromLinks(links));
+        return this.filterPageLinksFromCurrentOrigin(this.getPageLinks());
     }
 
     public getCssPageLinks(){

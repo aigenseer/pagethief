@@ -4,9 +4,9 @@ import { IPageDocumentParam } from "./PageDocument";
 import FormatUtils  from "../utils/FormatUtils";
 
 export interface IContentTask{
-    id: string;
-    param: null|any;
-    result: any|null
+    id:     string;
+    param:  null|any;
+    result: any|null;
     onResultCallback(result: IContentTask["param"]): void;
 
 }
@@ -18,8 +18,8 @@ export class ContentTask {
     private onResultCallback: IContentTask["onResultCallback"];
 
     constructor(id: IContentTask["id"], param: IContentTask["param"], onResultCallback: IContentTask["onResultCallback"]){
-        this.id = id;
-        this.param = param;
+        this.id     = id;
+        this.param  = param;
         this.onResultCallback = onResultCallback;
     }
 
@@ -93,8 +93,9 @@ export default class ContentClient {
 
     public getCurrentPageDocumentParam(cb: IContentClient["getCurrentPageDocumentParamCallback"]){
         this.runTask("getCurrentPageDocumentParam", null, (param) => {
+            param.url = new URL(param.url);            
             cb(param);                    
-        })
+        });
     }
 
   

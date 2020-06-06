@@ -1,11 +1,7 @@
 import BrowserUtils           from "../utils/BrowserUtils";
-import BackgroundUtils        from "../utils/BackgroundUtils";
 import IBrowser               from "../../interface/IBrowser";
-
 import ContentClient          from "./ContentClient";
 import LoggerUtils            from "../utils/LoggerUtils";
-
-
 
 
 export default class ContentServer {
@@ -14,16 +10,20 @@ export default class ContentServer {
    
     constructor(){
         this.onConnect = this.onConnect.bind(this);
-        BackgroundUtils.onMessage(this.onConnect);
-    }
-
+        BrowserUtils.onMessage(this.onConnect);
+    }    
+    
     private isNewClientID(clientID){
         return !Object.keys(this.client).includes(clientID);
+    }
+
+    public getClientIDs() {
+        return Object.keys(this.client);
     }
    
     private onConnect(response: IBrowser["msg"], sender: IBrowser["sender"], sendResponse: IBrowser["sendResponse"]){
         if(response.task){
-            
+              
             let clientID = sender.tab.id.toString();  
 
             switch (response.task) {
@@ -62,9 +62,6 @@ export default class ContentServer {
         });
        
     }
-         
-    
-
 
 }
 

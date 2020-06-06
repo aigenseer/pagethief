@@ -14,4 +14,13 @@ export default class StringUtils {
         return StringUtils.getHash(s).toString();
     }
 
+    static validURL(s: string){        
+        try {
+            new URL(s);
+        } catch (_) {
+            return false;  
+        }        
+        return true;
+    }
+
 }

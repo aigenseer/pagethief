@@ -5,7 +5,7 @@ interface Response {
     param: any|null
 }
 
-interface IContentUtils{
+export interface IContentUtils{
     callback(response: any): void;
 }
 

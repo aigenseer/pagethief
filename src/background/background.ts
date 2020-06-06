@@ -1,6 +1,6 @@
 import ContentServer          from "../lib/class/ContentServer";
 import LoggerUtils            from "../lib/utils/LoggerUtils";
-import Thief, { IThiefAsset } from "../lib/class/Thief";
+import Thief                  from "../lib/class/Thief";
 import Builder                from "../lib/class/Builder";
 
 

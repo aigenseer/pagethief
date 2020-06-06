@@ -1,35 +1,32 @@
 
 import PageDocument, { IPageDocumentParam } from "../class/PageDocument";
 
-export default class PageDocumentUtils {
+export default class HTMLUtils {
 
     static getPageDocumentParameterFromCurrentDocument(): IPageDocumentParam
     {
         return {
-            html:   document.documentElement.outerHTML, 
-            origin: window.location.origin,
-            href:   window.location.href,
+            data:  document.documentElement.outerHTML, 
+            url:   new URL(window.location.href),
         };
     } 
 
     static createPageDocumentParam(link: string, html: string): IPageDocumentParam
     {
-        let url = new URL(link);
         return {
-            html:   html, 
-            origin: url.origin,
-            href:   url.href,
+            data:   html, 
+            url:    new URL(link)
         };
     }
 
     static createPageDocument(link: string, html: string): PageDocument
     {
-        return new PageDocument(PageDocumentUtils.createPageDocumentParam(link, html));
+        return new PageDocument(HTMLUtils.createPageDocumentParam(link, html));
     }
 
     static getPageDocumentFromCurrentDocument(): PageDocument
     {
-        return new PageDocument(PageDocumentUtils.getPageDocumentParameterFromCurrentDocument());
+        return new PageDocument(HTMLUtils.getPageDocumentParameterFromCurrentDocument());
     }   
 
 }
