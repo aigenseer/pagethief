@@ -13,10 +13,7 @@ export default class ContentScriptWorker {
         switch (type) {
             case 'base64':
                 return ContentScriptWorker.fetchDataAsBase64(url);
-                break;
-            case 'dataURL':
-                return ContentScriptWorker.fetchDataAsDataURL(url);
-                break;        
+                break;       
             default:
                 return ContentScriptWorker.fetchDataAsString(url);
                 break;
@@ -31,19 +28,6 @@ export default class ContentScriptWorker {
                 }else{
                     resolve(null);
                 }
-            }).catch(reject);
-        });
-    }
-    
-
-    static fetchDataAsDataURL(url: string){
-        return new Promise( (resolve, reject) => {
-            axios.get(url, { responseType: 'blob' }).then((response) => {
-                if(response.data){
-                    FormatUtils.getDataURLFromBlob(response.data).then(resolve).catch(reject);
-                }else{
-                    resolve(null);
-                }                
             }).catch(reject);
         });
     }

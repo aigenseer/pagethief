@@ -4,15 +4,18 @@ import IBrowser     from "../../interface/IBrowser";
 export interface IBrowserUtils{
     tabCallback(tab: chrome.tabs.Tab): void
     tabIDCallback(tabID: number|null): void;
+    sendMessageCallback(response: any): void;
+    onMessageListen(msg: IBrowser["msg"], sender: IBrowser["sender"], sendResponse: IBrowser["sendResponse"]): void;
+    response: {
+        task: string,
+        param: any|null
+    }
 }
 
-export interface IContentUtils{
-    onListen(msg: IBrowser["msg"], sender: IBrowser["sender"], sendResponse: IBrowser["sendResponse"]): void;
-}
 
 export default class BrowserUtils {
-
-    static onMessage(onListen?: IContentUtils["onListen"])
+    
+    static onMessage(onListen?: IBrowserUtils["onMessageListen"])
     {
         chrome.runtime.onMessage.addListener((msg: IBrowser["msg"], sender: IBrowser["sender"], sendResponse: IBrowser["sendResponse"]) => {
             LoggerUtils.log("Received %o from %o, frame", msg, sender.tab, sender.frameId)
@@ -40,6 +43,16 @@ export default class BrowserUtils {
             }
             cb(tabId);
         })
+    }
+
+    static sendMessage(task: string, param: any|null, callback?: IBrowserUtils["sendMessageCallback"])
+    {
+        chrome.runtime.sendMessage({task, param}, function(response) {
+            LoggerUtils.log("Response: ", response);
+            if(callback){                
+                callback(response);
+            }
+        });
     }
 
     static getBackground(){

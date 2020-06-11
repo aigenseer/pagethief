@@ -18,8 +18,8 @@ export class ContentTask {
     private onResultCallback: IContentTask["onResultCallback"];
 
     constructor(id: IContentTask["id"], param: IContentTask["param"], onResultCallback: IContentTask["onResultCallback"]){
-        this.id     = id;
-        this.param  = param;
+        this.id               = id;
+        this.param            = param;
         this.onResultCallback = onResultCallback;
     }
 
@@ -54,9 +54,13 @@ export default class ContentClient {
     private currentTask: ContentTask = null;
     private currentResponse: null;
 
-    constructor(id: string, currentResponse){
-        this.id = id;
+    constructor(id: string, currentResponse: any){
+        this.id = id;        
         this.currentResponse = currentResponse;
+    }
+
+    public getID(){
+        return this.id;
     }
 
     private startTask(){
@@ -82,7 +86,7 @@ export default class ContentClient {
     }
 
 
-    public responseTask(taskID: string, result: any|null, currentResponse){
+    public responseTask(taskID: string, result: any|null, currentResponse: any){
         LoggerUtils.log("Client %s response task %s with result ", this.id, taskID, result);
         this.currentTask.setResult(result);
         this.currentTask     = null;
@@ -96,13 +100,10 @@ export default class ContentClient {
             param.url = new URL(param.url);            
             cb(param);                    
         });
-    }
-
-  
-    
+    } 
 
 
-    public getData(link: string, type: 'base64'|'string'|'blob'|'dataURL'): Promise<string|Blob>
+    public getData(link: string, type: 'base64'|'string'|'blob'): Promise<string|Blob>
     {
         return new Promise(async (resolve, reject) => {
             try {

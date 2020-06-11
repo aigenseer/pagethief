@@ -1,4 +1,4 @@
-import { IContentUtils, IBrowserUtils }  from "../BrowserUtils";
+import { IBrowserUtils }  from "../../../lib/utils/BrowserUtils";
 import IBrowser                          from "../../../interface/IBrowser";
 import { chrome }                        from '@bumble/jest-chrome';
 
@@ -16,7 +16,7 @@ export default class BrowserUtils {
         }
     };
 
-    static onMessage(onListen?: IContentUtils["onListen"])
+    static onMessage(onListen?: IBrowserUtils["onMessageListen"])
     {
         chrome.runtime.sendMessage.mockImplementation((msg: IBrowser["msg"], sendResponse: IBrowser["sendResponse"]) => {
             onListen(msg, BrowserUtils.senderMock, sendResponse);
@@ -36,6 +36,16 @@ export default class BrowserUtils {
             }
             cb(tabId);
         })
+    }
+
+    static sendMessage(task: string, param: any|null, callback?: IBrowserUtils["sendMessageCallback"])
+    {
+        chrome.runtime.sendMessage({task, param}, function(response) {
+            //callback("???ß");
+            if(callback){                
+                callback(response);
+            }
+        });
     }
     
 

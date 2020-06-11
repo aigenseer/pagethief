@@ -1,24 +1,12 @@
 import LoggerUtils from "./LoggerUtils";
+import BrowserUtils, { IBrowserUtils } from "../utils/BrowserUtils";
 
-interface Response {
-    task: string,
-    param: any|null
-}
-
-export interface IContentUtils{
-    callback(response: any): void;
-}
 
 export default class ContentUtils {
 
-    static sendMessage(task: string, param: Response["param"], callback?: IContentUtils["callback"])
+    static sendMessage(task: string, param: IBrowserUtils["response"]["param"], callback?: IBrowserUtils["sendMessageCallback"])
     {
-        chrome.runtime.sendMessage({task, param}, function(response) {
-            LoggerUtils.log("Response: ", response);
-            if(callback){                
-                callback(response);
-            }
-        });
+        BrowserUtils.sendMessage(task, param, callback);
     }
 
    static getConnection(){
@@ -27,27 +15,30 @@ export default class ContentUtils {
         return connection;
    }
 
+   
+
 }
 
 
 export interface IContentConnection{
-    callback(param: Response["param"]): Response["param"]
+    callback(param: IBrowserUtils["response"]["param"]): IBrowserUtils["response"]["param"]
 }
 
 export class ContentConnection {
     
     private TASK_MAP: { [key: string]: IContentConnection["callback"] } = {
-        getCurrentPageDocumentParam: ()=>{},
-        getData:() => {}
+        getCurrentPageDocumentParam: ()=> { console.error("No listener found onRequireCurrentPageDocumentParam") },
+        getData:() => { console.error("No listener found onFetchData") }
     }  
 
     constructor(){
         this.handleRouting = this.handleRouting.bind(this);
     }
 
-    private handleRouting(response: Response){
+    private handleRouting(response: IBrowserUtils["response"])
+    {
         if(response.task && Object.keys(this.TASK_MAP).includes(response.task)){
-            this.TASK_MAP[response.task](response.param).then(callParameter => {
+            this.TASK_MAP[response.task](response.param).then((callParameter: IBrowserUtils["response"]["param"]) => {
                 ContentUtils.sendMessage(response.task, callParameter, this.handleRouting);
             });
         }else{
